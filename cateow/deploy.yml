@@ -1,0 +1,24 @@
+- hosts: cateow
+  become: yes
+  become_user: root
+  tasks:
+    - name: install git
+      apt:
+        name: git
+        state: latest
+    - name: install python
+      apt:
+        name: python
+        state: latest
+    - name: install pip
+      apt:
+        name: python-pip
+        state: latest
+    - name: clone repo
+      git:
+        dest: /vagrant/cateow
+        repo: 'http://github.com/paulaCrismaru/cateow.git'
+        force: 'yes'
+    - name: install cateow
+      shell: 'cd /vagrant/cateow ; python setup.py install'
+
