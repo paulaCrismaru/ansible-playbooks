@@ -1,24 +1,32 @@
 - hosts: cateow
   become: yes
   become_user: root
+  vars:
+    project_directory: "/vagrant/cateow"
   tasks:
-    - name: install git
+    - name: install {{ item }}
       apt:
-        name: git
+        name: "{{ item }}"
         state: latest
-    - name: install python
-      apt:
-        name: python
-        state: latest
-    - name: install pip
-      apt:
-        name: python-pip
-        state: latest
-    - name: clone repo
-      git:
-        dest: /vagrant/cateow
-        repo: 'http://github.com/paulaCrismaru/cateow.git'
-        force: 'yes'
-    - name: install cateow
-      shell: 'cd /vagrant/cateow ; python setup.py install'
-
+      with_items:
+        - git
+        - python
+        - python-pip
+    - name: install {{ item }}
+      pip:
+        name: "{{ item }}"
+      with_items:
+        - virtualenv
+    - name: add environment variables
+      lineinfile:
+          dest: /home/vagrant/.bashrc
+          line: "{{ item }}"
+      with_items:
+        - 'PROJDIR="{{ project_directory }}"'
+        - 'cd "$PROJDIR"'
+        - 'source "$PROJDIR/.venv/py/bin/activate"'
+    - name: prepare env
+      shell: "{{ item }}"
+      with_items:
+        - 'virtualenv {{ project_directory }}/.venv/py'
+        - 'cd {{ project_directory }} ; .venv/py/bin/python setup.py develop'
